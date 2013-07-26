@@ -8,15 +8,25 @@ defans={'10','10'};
 Resize='on';
 SizeAns=inputdlg(prompt,name,numlines,defans,Resize);
 % According to the input, get the length and wide
-if isequal(SizeAns,{}) || isequal(size(SizeAns),[2,1])
-    NumL=10;
+if isempty(SizeAns)
     NumW=10;
+    NumL=10;
 else
-    NumL=str2double(SizeAns{1});
-    NumW=str2double(SizeAns{2});
+    NumL=SizeAns{1};
+    NumW=SizeAns{2};
+    if isequal(NumW,'')
+        NumW=10;
+    else
+        NumW=str2double(NumW);
+    end
+    if isequal(NumL,'')
+        NumL=10;
+    else
+        NumL=str2double(NumL);
+    end
 end
 % Then Creat a map for the game
-GameLifeMatrix=zeros(NumL+2,NumW+2);%create the control matrix.
+GameLifeMatrix=zeros(NumW+2,NumL+2);%create the control matrix.
 GameLifeMatrix=rand(size(GameLifeMatrix));%create random number for Game
 GameLifeMatrix=round(GameLifeMatrix);%make the number of game be 0 or 1.
 %make the fist and the last line and row be 0.
@@ -35,11 +45,13 @@ end
 axis([1 NumL+1 1 NumW+1]);
 axis off;
 % Let the user input the begining dot location
-title('Now, Please Input the begining ''Life'' point.If you have finished input, please any key to quit input','fontsize',10)
+title('Now, Please Input the begining ''Life'' point.If you have finished input, please ''s'' to quit input','fontsize',10)
 GoOn=1;
 while GoOn
     [x_mouse,y_mouse,mouse_key]=ginput(1);
-    if mouse_key==1 || mouse_key==3 || mouse_key==2
+    if isempty(mouse_key)
+        title('If you want to stop input point, please press ''s''','fontsize',20,'color','r');
+    elseif mouse_key==1 || mouse_key==3 || mouse_key==2
         x_mouse=fix(x_mouse);
         y_mouse=fix(y_mouse);
         if x_mouse==NumL+1
@@ -55,13 +67,15 @@ while GoOn
                 GameLifeMatrix(y_mouse+1,x_mouse+1)=0;
             end
         end
-    else
+    elseif mouse_key==115
         GoOn=0;
+    else
+        title('If you want to stop input point, please press ''s''','fontsize',20,'color','r');
     end
 end
 % Now, begin to calculate
-title('Press "space" to finish.','fontsize',15);
-pause(1)
+clear x_mouse y_mouse GoOn SizeAns mouse_key Resize defans name numlines prompt
+title('Press "space" to finish.','fontsize',15,'color','k');
 x_add=[-1 0 1 -1 1 -1 0 1];
 y_add=[-1 -1 -1 0 0 1 1 1];
 k=1;
@@ -78,10 +92,10 @@ while k
             for n=1:8
                 Sum=Sum+GameLifeMatrix(y+1+x_add(n),x+1+y_add(n));
             end
-            if (GameLifeMatrix(y+1,x+1)==1 && (Sum==2 || Sum==3)) || (GameLifeMatrix(y+1,x+1)==0 && Sum==3)
+            if Sum==3
                 GameLifeMatrix(y+1,x+1)=1;
                 rectangle('Position',[x,y,1,1],'edgecolor','k','facecolor','r');
-            else
+            elseif Sum~=2 && Sum~=3
                 GameLifeMatrix(y+1,x+1)=0;
                 rectangle('Position',[x,y,1,1],'edgecolor','k','facecolor','w');
             end
@@ -92,7 +106,8 @@ while k
         errordlg('All life has been died.','Game has been finished');
     elseif isequal(GameLifeMatrix,GameLifeMatrix_copy)
         k=0;
+        title('The world is in the peace','fontsize',20)
         errordlg('The world is in the peace','Game has been finished')
     end
-    pause(0.5)
+    pause(1/5)
 end
