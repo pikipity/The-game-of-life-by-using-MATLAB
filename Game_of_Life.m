@@ -17,11 +17,19 @@ else
 end
 % Then Creat a map for the game
 GameLifeMatrix=zeros(NumL+2,NumW+2);%create the control matrix.
+GameLifeMatrix=rand(size(GameLifeMatrix));%create random number for Game
+GameLifeMatrix=round(GameLifeMatrix);%make the number of game be 0 or 1.
+%make the fist and the last line and row be 0.
+GameLifeMatrix(1,:)=0;GameLifeMatrix(:,1)=0;GameLifeMatrix(NumL+2,:)=0;GameLifeMatrix(:,NumW+2)=0;
 figure('Name','The game of life');
 hold on;
-for x=1:NumL+1
-    for y=1:NumW+1
-        rectangle('Position',[x,y,1,1],'edgecolor','k','facecolor','w');
+for x=1:NumL
+    for y=1:NumW
+        if GameLifeMatrix(y+1,x+1)==0
+            rectangle('Position',[x,y,1,1],'edgecolor','k','facecolor','w');
+        else
+            rectangle('Position',[x,y,1,1],'edgecolor','k','facecolor','r');
+        end
     end
 end
 axis([1 NumL+1 1 NumW+1]);
@@ -58,9 +66,11 @@ x_add=[-1 0 1 -1 1 -1 0 1];
 y_add=[-1 -1 -1 0 0 1 1 1];
 k=1;
 while k
+    GameLifeMatrix_copy=GameLifeMatrix;
     s=get(gcf,'currentkey');
     if strcmp(s,'space');
           k=0;
+          errordlg('Game has been finished.','Game has been Finish');
     end
     for x=1:NumL
         for y=1:NumW
@@ -79,8 +89,10 @@ while k
     end
     if isequal(GameLifeMatrix,zeros(size(GameLifeMatrix)))
         k=0;
-        errordlg('All life has been died.','Game has been Finish');
+        errordlg('All life has been died.','Game has been finished');
+    elseif isequal(GameLifeMatrix,GameLifeMatrix_copy)
+        k=0;
+        errordlg('The world is in the peace','Game has been finished')
     end
     pause(0.5)
 end
-errordlg('Game has been finished.','Game has been Finish');
